@@ -11,7 +11,7 @@ treinar as habilidades de segurança da informação por meio desses exercícios
 
 - [Página do exercicio](https://play.picoctf.org/practice/challenge/472)
 
-Esta questão tem como objetivo análisar e caso necessário, modificar o código fornecido em Python [Python](https://aws.amazon.com/pt/what-is/python/), chamdao hamado lyric-reader.py que lê e exibe uma letra de música interativa, para que esse código mostre a flag escondida.
+Esta questão tem como objetivo análisar e caso necessário, modificar o código fornecido em [Python](https://aws.amazon.com/pt/what-is/python/), chamdao hamado lyric-reader.py que lê e exibe uma letra de música interativa, para que esse código mostre a flag escondida.
 
 #### Análise Inicial
 
@@ -187,4 +187,5 @@ Flag:
 
 
 Este exercicio foi um tanto desafiador, pois foi necessário entender como todo código funciona e como a função que continha a flag poderia ser exibida no formato certo. Além de testar a leitura, interpretação e estrutura do código, ele  reforça sobre boas práticas no tratamento das entradas de dados feitas pelo usuário, fazer as validações e a "higienização" apropriada, pois sem essas validações o usuário pode manipular o fluxo do programa, exibindo informações sensíveis em contextos reais e que podem comprometer a segurança do sistema.
+
 
