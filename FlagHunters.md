@@ -185,7 +185,10 @@ Flag:
 >`picoCTF{70637h3r_f0r3v3r_c373964d}`
 
 
+<img width="549" height="561" alt="ResultadoFHpicoCTF" src="https://github.com/user-attachments/assets/9c3bc51f-5d66-4507-b9f0-6435bca95e80" />
+
 
 Este exercicio foi um tanto desafiador, pois foi necessário entender como todo código funciona e como a função que continha a flag poderia ser exibida no formato certo. Além de testar a leitura, interpretação e estrutura do código, ele  reforça sobre boas práticas no tratamento das entradas de dados feitas pelo usuário, fazer as validações e a "higienização" apropriada, pois sem essas validações o usuário pode manipular o fluxo do programa, exibindo informações sensíveis em contextos reais e que podem comprometer a segurança do sistema.
+
 
 
