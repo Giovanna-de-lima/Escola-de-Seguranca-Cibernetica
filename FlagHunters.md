@@ -1,71 +1,190 @@
-# DuckWare Team - You either know, XOR you don't (CryptoHack)
-###### Solved by @vin1sss
+# Flag Hunters (Reverse Engenieering) 
+###### Solved by @Giovanna-de-lima
 
-> This is a CTF about Cryptography
+> This is a CTF about Reverse Engenieering
 
-## Desafio: You either know, XOR you don't (Criptografia)
+## Desafio: Flag Hunters (Engenharia Reversa)
 #### Introdução
 
-Este é o último desafio da trilha de aprendizado ["Introduction to CryptoHack"](https://cryptohack.org/courses/intro/) da plataforma [CryptoHack](https://cryptohack.org/). A trilha é composta por uma série de 10 exercícios introdutórios voltados ao estudo da [criptografia](https://pt.wikipedia.org/wiki/Criptografia) e ao funcionamento da própria plataforma. Seu principal objetivo é proporcionar uma base sólida nos conceitos fundamentais da criptografia moderna, por meio da prática com desafios progressivos e acessíveis para iniciantes.
+Este é o segundo exercicio proposto na Escola de Cyber Segurança da plataforma [picoCTF]([https://cryptohack.org/](https://play.picoctf.org/practice)). A trilha é composta por uma série de 4 exercícios introdutórios voltados para a prática de resolução de problemas de [CTFs](https://ctf-br.org/sobre/), com o objetivo é desenvolver o raciocinio, habilidades de pesquisa e 
+treinar as habilidades de segurança da informação por meio desses exercícios práticos. 
 
-- [Página do desafio](https://cryptohack.org/courses/intro/xorkey1/)
+- [Página do exercicio](https://play.picoctf.org/practice/challenge/472)
 
-Esta questão consiste em decriptar uma string em [hexadecimal](https://pt.wikipedia.org/wiki/Sistema_de_numera%C3%A7%C3%A3o_hexadecimal) para encontrar a flag.
+Esta questão tem como objetivo análisar e caso necessário, modificar o código fornecido em Python [Python](https://aws.amazon.com/pt/what-is/python/), chamdao hamado lyric-reader.py que lê e exibe uma letra de música interativa, para que esse código mostre a flag escondida.
 
 #### Análise Inicial
 
-Após ensinar o funcionamento do [algoritmo XOR](https://www.101computing.net/xor-encryption-algorithm/) nos desafios anteriores, agora é apresentado algo um pouco mais desafiante. O enunciado é simples, contendo apenas a frase:
+Ao entrar no exercicio temos o enunciado abaixo:
+> *"Lyrics jump from verses to the refrain kind of like a subroutine call. There's a hidden refrain this program doesn't print by default. Can you get it to print it? There might be something in it for you."*  
+> *(As letras saltam dos versos para o refrão, como uma chamada de subrotina. Há um refrão oculto que este programa não imprime por padrão. Você consegue fazer com que ele o imprima? Pode haver algo nele para você.)*
 
-> *"I've encrypted the flag with my secret key, you'll never be able to guess it."*  
-> *(Eu criptografei a bandeira com minha chave secreta, você nunca será capaz de adivinhá-la.)*
+Além disso, há três dicas:
+> *"Este programa pode facilmente entrar em estados indefinidos. Não tenha vergonha de usar Ctrl-C."*  
+> *A entrada de dados do usuário não higienizada é sempre boa, certo?*
+> *Existe alguma sintaxe que seja propícia à subversão?*
 
-Além disso, há uma dica:
+E para esse desafio temos o código a ser análisado:
+```
+import re
+import time
 
-> *"Remember the flag format and how it might help you in this challenge!"*  
-> *(Lembre-se do formato da bandeira e como ele pode ajudar você neste desafio!)*
 
-E também uma string em hexadecimal:
+# Read in flag from file
+flag = open('flag.txt', 'r').read()
 
-0e0b213f26041e480b26217f27342e175d0e070a3c5b103e2526217f27342e175d0e077e263451150104
+secret_intro = \
+'''Pico warriors rising, puzzles laid bare,
+Solving each challenge with precision and flair.
+With unity and skill, flags we deliver,
+The ether’s ours to conquer, '''\
++ flag + '\n'
+
+
+song_flag_hunters = secret_intro +\
+'''
+
+[REFRAIN]
+We’re flag hunters in the ether, lighting up the grid,
+No puzzle too dark, no challenge too hid.
+With every exploit we trigger, every byte we decrypt,
+We’re chasing that victory, and we’ll never quit.
+CROWD (Singalong here!);
+RETURN
+
+[VERSE1]
+Command line wizards, we’re starting it right,
+Spawning shells in the terminal, hacking all night.
+Scripts and searches, grep through the void,
+Every keystroke, we're a cypher's envoy.
+Brute force the lock or craft that regex,
+Flag on the horizon, what challenge is next?
+
+REFRAIN;
+
+Echoes in memory, packets in trace,
+Digging through the remnants to uncover with haste.
+Hex and headers, carving out clues,
+Resurrect the hidden, it's forensics we choose.
+Disk dumps and packet dumps, follow the trail,
+Buried deep in the noise, but we will prevail.
+
+REFRAIN;
+
+Binary sorcerers, let’s tear it apart,
+Disassemble the code to reveal the dark heart.
+From opcode to logic, tracing each line,
+Emulate and break it, this key will be mine.
+Debugging the maze, and I see through the deceit,
+Patch it up right, and watch the lock release.
+
+REFRAIN;
+
+Ciphertext tumbling, breaking the spin,
+Feistel or AES, we’re destined to win.
+Frequency, padding, primes on the run,
+Vigenère, RSA, cracking them for fun.
+Shift the letters, matrices fall,
+Decrypt that flag and hear the ether call.
+
+REFRAIN;
+
+SQL injection, XSS flow,
+Map the backend out, let the database show.
+Inspecting each cookie, fiddler in the fight,
+Capturing requests, push the payload just right.
+HTML's secrets, backdoors unlocked,
+In the world wide labyrinth, we’re never lost.
+
+REFRAIN;
+
+Stack's overflowing, breaking the chain,
+ROP gadget wizardry, ride it to fame.
+Heap spray in silence, memory's plight,
+Race the condition, crash it just right.
+Shellcode ready, smashing the frame,
+Control the instruction, flags call my name.
+
+REFRAIN;
+
+END;
+'''
+
+MAX_LINES = 100
+
+def reader(song, startLabel):
+  lip = 0
+  start = 0
+  refrain = 0
+  refrain_return = 0
+  finished = False
+
+  # Get list of lyric lines
+  song_lines = song.splitlines()
+  
+  # Find startLabel, refrain and refrain return
+  for i in range(0, len(song_lines)):
+    if song_lines[i] == startLabel:
+      start = i + 1
+    elif song_lines[i] == '[REFRAIN]':
+      refrain = i + 1
+    elif song_lines[i] == 'RETURN':
+      refrain_return = i
+
+  # Print lyrics
+  line_count = 0
+  lip = start
+  while not finished and line_count < MAX_LINES:
+    line_count += 1
+    for line in song_lines[lip].split(';'):
+      if line == '' and song_lines[lip] != '':
+        continue
+      if line == 'REFRAIN':
+        song_lines[refrain_return] = 'RETURN ' + str(lip + 1)
+        lip = refrain
+      elif re.match(r"CROWD.*", line):
+        crowd = input('Crowd: ')
+        song_lines[lip] = 'Crowd: ' + crowd
+        lip += 1
+      elif re.match(r"RETURN [0-9]+", line):
+        lip = int(line.split()[1])
+      elif line == 'END':
+        finished = True
+      else:
+        print(line, flush=True)
+        time.sleep(0.5)
+        lip += 1
+
+reader(song_flag_hunters, '[VERSE1]')
+```
 
 Print do enunciado:
-[![Captura-de-tela-2025-06-13-134751.png](https://i.postimg.cc/P5b2Kb0Z/Captura-de-tela-2025-06-13-134751.png)](https://postimg.cc/bZJxwnyN)
+[![FH.png](https://i.postimg.cc/gj2ZFZwn/FH.png)](https://postimg.cc/gX1J3rHW)
+
 
 #### Interpretando a dica
+A dica que nos direciona para a melhor resolução é sobre as entradas do usuario, nesse caso, como vimos que a entrada de dados não é tratada podemos manipular o fluxo do programa através dela. 
 
-A dica fornecida no enunciado nos direciona a uma única abordagem lógica. Sabemos que o algoritmo XOR opera sobre dois conjuntos de dados:
-
-[![xor-xor.webp](https://i.postimg.cc/yNDhtwNM/xor-xor.webp)](https://postimg.cc/4KThh2VP)
-
-Neste caso, uma das entradas é a string em hexadecimal apresentada no desafio. Assim, resta deduzirmos a segunda entrada, que deve ser algo que já conhecemos.
-
-Como aprendemos ao longo da trilha, todas as flags seguem um formato padronizado e começam com `"crypto{"`. Podemos, portanto, usar esse trecho conhecido da flag como ponto de partida para tentar descobrir qual foi a chave secreta utilizada na cifra.
 
 #### Solução
+Inicialmente recebemos o código fonte (lyric-reader.py) em Python para ser analisado. Para resolver este exercicio, utilizei duas ferramentas, o VScode, para verificar o funcionamento das partes do código e depois o próprio terminal da plataforma picoCTF (o picoCTF Webshell) para fazer alterações e capturar a flag. Antes de usar o picoCTF Webshell , é necessário Iniciar a Instancia e utilizar o comando: nc verbal-sleep.picoctf.net [numero da porta fornecida], para vermos o código sendo executado. 
 
-Para resolver este desafio, utilizarei o site [dcode.fr](https://www.dcode.fr/xor-cipher), que contém uma ferramenta prática para realizar operações de [XOR](https://www.101computing.net/xor-encryption-algorithm/) entre textos e/ou valores hexadecimais. Essa ferramenta facilita a aplicação do algoritmo e nos permite testar hipóteses sobre a chave ao comparar os resultados com o formato esperado da flag.
+Há três partes principais no código:
+- Leitura da Flag: o código que lê o conteúdo de um arquivo flag.txt e armazena na variável chamada flag.
+- Letra da Música: a variável song_flag_hunters contém a letra da música, incluindo um trecho inicial chamado secret_intro, onde está a nossa flag.
+- Função reader: responsável por exibir a letra da música interativamente e começa a exibição a partir de um marcador específico (startLabel), permitindo a interação do usuário em pontos definidos pela palavra chave CROWD.
 
-Então, inserindo a string em hexadecimal fornecida no enunciado diretamente na caixa de texto principal (que aceita entradas em hexadecimal, sem a necessidade de conversão prévia), e o trecho conhecido da flag `"crypto{"` na caixa de texto da opção marcada **"Use the ascii key"** (que permite entradas em texto padrão), realizamos a primeira análise:
+Notamos que a música começa a ser exibida a partir do [VERSE1], mas precisamos que comece exibindo a partir do inicio, contemplando o trecho [secret_intro] onde está a nossa flag. Para isso, manipulamos a entrada do usuário, que nos da essa permissão, pois não é tratada. Para isso, utilizaremos o RETURN 0 para controlar o fluxo de exibição da letra. Entretanto para que sea intermpretado de forma correta, é necessário formatar a entrada como uma string seguida de ;RETURN 0, garantindo que o comando seja executado e não apenas exibido como texto.
+Se usarmos só o RETURN 0, será tratado como texto e não será executado, já se colocarmos o ;RETURN 0 ele é executado e  altera o fluxo do programa.
 
-[![Captura-de-tela-2025-06-13-141610.png](https://i.postimg.cc/6q2y50Cm/Captura-de-tela-2025-06-13-141610.png)](https://postimg.cc/YL7pdQn6)
-
-A ferramenta aplicará o XOR entre os primeiros bytes da string e a palavra `"crypto{"`, revelando a parte inicial da chave secreta utilizada na criptografia:
-
-[![Captura-de-tela-2025-06-13-142408.png](https://i.postimg.cc/xdpHPgy6/Captura-de-tela-2025-06-13-142408.png)](https://postimg.cc/QB5H8Qz7)
-
-Agora que sabemos o começo da chave secreta, `"myXORkey"`, utilizamos essa informação para realizar uma nova operação de XOR. Desta vez, em vez de usar o trecho conhecido da flag, aplicamos diretamente a chave descoberta sobre toda a string em hexadecimal.
-
-[![Captura-de-tela-2025-06-13-143321.png](https://i.postimg.cc/RhSBV12z/Captura-de-tela-2025-06-13-143321.png)](https://postimg.cc/dkxX5CqW)
-
-A própria ferramenta do dcode se encarrega de repetir automaticamente a chave ao longo de toda a entrada — o que é essencial, já que a chave tem apenas 8 bytes, enquanto a string criptografada possui dezenas de bytes. Com isso, conseguimos aplicar corretamente a operação de XOR byte a byte, o que revela o conteúdo original criptografado: a flag completa.
-
-[![Captura-de-tela-2025-06-13-143409.png](https://i.postimg.cc/Sx2psx1j/Captura-de-tela-2025-06-13-143409.png)](https://postimg.cc/21Dt9rDf)
+Assim, usando o comando "string;RETURN 0" no picoCTF Webshell, em frente a palavra chave CROWD, assim o codigo irá para a primeira linha da letra, exibindo o trecho secret_intro onde conseguimos mostrar nossa flag. 
 
 #### Conclusão
 
 Flag:
->`crypto{1f_y0u_Kn0w_En0uGH_y0u_Kn0w_1t_4ll}`
+>`picoCTF{70637h3r_f0r3v3r_c373964d}`
 
-Este desafio foi uma excelente aplicação prática dos conceitos fundamentais de criptografia com XOR. Através de um pequeno trecho conhecido da flag, conseguimos deduzir parte da chave secreta utilizada na cifra. A partir disso, utilizamos uma ferramenta online para repetir essa chave ao longo de toda a mensagem criptografada, revertendo o processo de encriptação e revelando a flag completa.
 
-Mais do que simplesmente encontrar a resposta, este exercício reforça a importância de padrões previsíveis em contextos criptográficos. Quando uma parte da mensagem é conhecida — ou pode ser adivinhada —, todo o sistema se torna vulnerável. Essa lição é essencial não só para resolver desafios em CTFs, mas também para compreender os riscos reais em sistemas mal projetados no mundo da segurança da informação.
+
+Este exercicio foi um tanto desafiador, pois foi necessário entender como todo código funciona e como a função que continha a flag poderia ser exibida no formato certo. Além de testar a leitura, interpretação e estrutura do código, ele  reforça sobre boas práticas no tratamento das entradas de dados feitas pelo usuário, fazer as validações e a "higienização" apropriada, pois sem essas validações o usuário pode manipular o fluxo do programa, exibindo informações sensíveis em contextos reais e que podem comprometer a segurança do sistema.
+
